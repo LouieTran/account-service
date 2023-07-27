@@ -1,0 +1,4 @@
+com/louie/market/accountservice/controller/AccountController.class
+com/louie/market/accountservice/AccountServiceApplication.class
+com/louie/market/accountservice/entity/AccountRequest.class
+com/louie/market/accountservice/service/AccountProducerService.class

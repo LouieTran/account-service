@@ -1,0 +1,46 @@
+version: '3.7'
+
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:6.2.0
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+      ZOOKEEPER_SYNC_LIMIT: "2"
+
+  kafkaserver:
+    container_name: kafka
+    image: confluentinc/cp-kafka:6.2.0
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafkaserver:29092, PLAINTEXT_HOST://localhost:9092"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false" # Tắt chế độ tự động tạo topic
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false" # Tắt support metrics
+    depends_on:
+      - zookeeper
+
+  kafka-create-topic:
+    container_name: kafka-create-topic
+    image: confluentinc/cp-kafka:6.2.0
+    command: bash -c "kafka-topics --create --bootstrap-server kafkaserver:9092 --replication-factor 1 --partitions 2 --topic account-topic && sleep infinity"
+    depends_on:
+      - zookeeper
+      - kafkaserver
+
+volumes:
+  zookeeper-data:
+  zookeeper-logs:
+  kafka-data:
